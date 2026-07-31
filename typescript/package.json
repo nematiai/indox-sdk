@@ -1,0 +1,31 @@
+{
+  "name": "@indox/sdk",
+  "version": "0.1.0",
+  "description": "Official Indox API v1 SDK for TypeScript / JavaScript",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/client.ts",
+  "types": "./src/client.ts",
+  "exports": {
+    ".": "./src/client.ts",
+    "./generated": "./generated/src/index.ts"
+  },
+  "files": [
+    "src",
+    "generated/src",
+    "README.md"
+  ],
+  "scripts": {
+    "smoke": "node ./smoke.mjs",
+    "build:generated": "cd generated && npm install && npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "indox",
+    "pdf",
+    "convert",
+    "sdk"
+  ]
+}

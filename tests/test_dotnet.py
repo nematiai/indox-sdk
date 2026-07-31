@@ -16,7 +16,7 @@ def _native() -> list[str]:
         return skip_native("dotnet", "dotnet not installed")
     key = load_api_key()
     base = base_url()
-    src = (REPO / "dotnet" / "src" / "IndoxClient.cs").read_text(encoding="utf-8")
+    src = (REPO / "languages" / "dotnet" / "src" / "IndoxClient.cs").read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "Smoke.csproj").write_text(

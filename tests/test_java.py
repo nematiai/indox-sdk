@@ -15,7 +15,7 @@ def _native() -> list[str]:
     java = shutil.which("java")
     if not javac or not java:
         return skip_native("java", "jdk not installed")
-    src = REPO / "java" / "src" / "main" / "java" / "org" / "indox" / "IndoxClient.java"
+    src = REPO / "languages" / "java" / "src" / "main" / "java" / "org" / "indox" / "IndoxClient.java"
     key = load_api_key()
     base = base_url()
     with tempfile.TemporaryDirectory() as tmp:

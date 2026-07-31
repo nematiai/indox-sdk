@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from openapi_sources import PUBLIC_OUT, REPO  # noqa: E402
 from sdk_targets import IMAGE, LANGS, ORDER, git_flags  # noqa: E402
 
-SDK_ROOT = REPO
+SDK_ROOT = REPO / "languages"
 SCHEMA_IN_CONTAINER = "/local/spec/openapi-public.json"
 
 
@@ -52,7 +52,7 @@ def generate(lang: str) -> Path:
         IMAGE, "generate",
         "-i", SCHEMA_IN_CONTAINER,
         "-g", generator,
-        "-o", f"/local/{subdir}/generated",
+        "-o", f"/local/languages/{subdir}/generated",
     ]
     cmd.extend(git_flags(lang))
     for p in props:

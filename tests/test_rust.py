@@ -16,7 +16,7 @@ def _native() -> list[str]:
         return skip_native("rust", "cargo not installed")
     key = load_api_key()
     base = base_url()
-    crate = REPO / "rust"
+    crate = REPO / "languages" / "rust"
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "Cargo.toml").write_text(

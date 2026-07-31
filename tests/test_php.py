@@ -16,7 +16,7 @@ def _native() -> list[str]:
         return skip_native("php", "php not installed")
     key = load_api_key()
     base = base_url()
-    client = (REPO / "php" / "src" / "IndoxClient.php").as_posix()
+    client = (REPO / "languages" / "php" / "src" / "IndoxClient.php").as_posix()
     script = f"""<?php
 require '{client}';
 putenv('INDOX_API_KEY={key}');

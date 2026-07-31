@@ -18,7 +18,7 @@ def _native() -> list[str]:
         return skip_native("go", "go not installed")
     key = load_api_key()
     base = base_url()
-    mod = REPO / "go"
+    mod = REPO / "languages" / "go"
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "go.mod").write_text(

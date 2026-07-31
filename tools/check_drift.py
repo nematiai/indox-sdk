@@ -102,7 +102,7 @@ def main() -> None:
         dumped = datetime.fromtimestamp(args.drf.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
         print(
             f"  NOTE {drf_only} op(s) resolved only via {args.drf.name} (dumped {dumped}), "
-            "not against the running stack — re-run `make sdk-openapi` to refresh it."
+            "not against the running stack — re-run `make openapi` to refresh it."
         )
 
 

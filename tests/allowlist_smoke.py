@@ -3,7 +3,7 @@
 Empty-body / fake-id probes: HTTP 400/401/403/404/422 = PASS (routed).
 HTTP ≥500 = FAIL.
 
-  PYTHONPATH=. python backend/tests/test_indox_client_sdk_v1.py
+  make smoke     (or: PYTHONPATH=. python3 tests/allowlist_smoke.py)
     (INDOX_BASE_URL / INDOX_CREDS_FILE come from .env; env vars override.)
 """
 from __future__ import annotations
@@ -18,10 +18,9 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from tools.creds import load_api_key  # noqa: E402
-from tools.env import get_env, require_env  # noqa: E402
+from tools.env import require_env  # noqa: E402
 
-# indox_client ships from its own repo; INDOX_PYTHON_SDK_PATH says where.
-sys.path.insert(0, get_env("INDOX_PYTHON_SDK_PATH", str(REPO)))
+sys.path.insert(0, str(REPO / "languages" / "python"))
 
 from indox_client import Indox, __version__  # noqa: E402
 from indox_client._exceptions import APIStatusError  # noqa: E402

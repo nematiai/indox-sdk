@@ -12,7 +12,7 @@ def _native() -> list[str]:
     node = shutil.which("node")
     if not node:
         return skip_native("typescript", "node not installed")
-    smoke = REPO / "typescript" / "smoke.mjs"
+    smoke = REPO / "languages" / "typescript" / "smoke.mjs"
     print("[typescript] node smoke.mjs")
     env = os.environ.copy()
     env["INDOX_BASE_URL"] = base_url()

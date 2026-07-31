@@ -12,7 +12,7 @@ def _native() -> list[str]:
     ruby = shutil.which("ruby")
     if not ruby:
         return skip_native("ruby", "ruby not installed")
-    lib = REPO / "ruby" / "lib" / "indox_client.rb"
+    lib = REPO / "languages" / "ruby" / "lib" / "indox_client.rb"
     key = load_api_key()
     base = base_url()
     code = f"""

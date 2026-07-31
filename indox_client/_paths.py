@@ -1,0 +1,13 @@
+"""Canonical API path prefixes — must match backend ``/api/v1/`` mounts."""
+
+HEALTH_PREFIX = "/api/v1/health"
+FONTS_PREFIX = "/api/v1/fonts"
+PDF_PREFIX = "/api/v1/pdf_handler"
+DOCS_PREFIX = "/api/v1/docs_core"
+MEDIA_PREFIX = "/api/v1/media_core"
+IMAGE_PREFIX = "/api/v1/convert/image"
+VIDEO_PREFIX = "/api/v1/convert/video"
+MODEL_PREFIX = "/api/v1/convert/model"
+WEBHOOKS_PREFIX = "/api/v1/webhooks"
+USER_PREFIX = "/api/v1/user"
+SUBSCRIPTION_PREFIX = "/api/v1/subscription"

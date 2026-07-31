@@ -71,15 +71,21 @@ dist-check: $(VENV)  ## twine check + install the wheel into a throwaway venv an
 	  print('import OK', __version__, Indox(api_key='x').base_url)"
 	rm -rf $(PY_DIR)/.venv-verify
 
-publish: $(VENV)  ## upload to PyPI (PYPI_TOKEN=… ; TESTPYPI=1 for test.pypi.org)
-	@test -n "$$PYPI_TOKEN" || { echo "Set PYPI_TOKEN (export it; do not paste it into a file)"; exit 1; }
+publish: $(VENV)  ## upload to PyPI (token from env or .env; TESTPYPI=1 to rehearse)
+	@tok=$${PYPI_TOKEN:-$$(sed -n 's/^PYPI_TOKEN=//p' $(ROOT)/.env 2>/dev/null | tail -1)}; \
+	 test -n "$$tok" || { echo "No PYPI_TOKEN in the environment or $(ROOT)/.env"; exit 1; }
 	@$(PY) tools/release.py --guard
 	$(MAKE) build dist-check
-	cd $(PY_DIR) && TWINE_USERNAME=__token__ TWINE_PASSWORD="$$PYPI_TOKEN" $(VPY) -m twine upload \
-	  $(if $(filter 1,$(TESTPYPI)),--repository-url https://test.pypi.org/legacy/,) dist/*
+	@tok=$${PYPI_TOKEN:-$$(sed -n 's/^PYPI_TOKEN=//p' $(ROOT)/.env 2>/dev/null | tail -1)}; \
+	 cd $(PY_DIR) && TWINE_USERNAME=__token__ TWINE_PASSWORD="$$tok" $(VPY) -m twine upload \
+	   $(if $(filter 1,$(TESTPYPI)),--repository-url https://test.pypi.org/legacy/,) dist/*
 
-release:       ## guard → build → check → publish → tag → push (PYPI_TOKEN=…)
+release:       ## +1 the version, then build → check → publish → tag → push
+	@$(PY) tools/release.py --bump-patch
+	@v=$$($(PY) tools/release.py --print-version); \
+	 git -C $(ROOT) add languages/python/indox_client/_version.py && \
+	 git -C $(ROOT) commit -q -m "release: indox-client $$v" && echo "committed release: indox-client $$v"
 	$(MAKE) publish
-	git -C $(ROOT) tag -a "python-v$$($(PY) tools/release.py --print-version)" \
-	  -m "indox-client $$($(PY) tools/release.py --print-version)"
-	git -C $(ROOT) push origin "python-v$$($(PY) tools/release.py --print-version)"
+	@v=$$($(PY) tools/release.py --print-version); \
+	 git -C $(ROOT) tag -a "python-v$$v" -m "indox-client $$v" && \
+	 git -C $(ROOT) push -q origin production "python-v$$v" && echo "pushed production + python-v$$v"

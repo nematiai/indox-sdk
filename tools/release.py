@@ -41,6 +41,20 @@ def set_version(new: str) -> None:
     print(f"version -> {new}  ({VERSION_FILE.relative_to(REPO)})")
 
 
+def next_patch(name: str) -> str:
+    """Current version with the patch +1, skipping anything already on PyPI."""
+    parts = current_version().split(".")
+    while len(parts) < 3:
+        parts.append("0")
+    published = published_versions(name)
+    major, minor, patch = parts[0], parts[1], int(parts[2])
+    while True:
+        patch += 1
+        candidate = f"{major}.{minor}.{patch}"
+        if candidate not in published:
+            return candidate
+
+
 def guard(name: str) -> None:
     version = current_version()
     if version in published_versions(name):
@@ -65,15 +79,18 @@ def main() -> None:
     p.add_argument("--guard", action="store_true")
     p.add_argument("--print-version", action="store_true")
     p.add_argument("--set-version")
+    p.add_argument("--bump-patch", action="store_true", help="version +1 (skips taken versions)")
     a = p.parse_args()
-    if a.set_version:
+    if a.bump_patch:
+        set_version(next_patch(a.name))
+    elif a.set_version:
         set_version(a.set_version)
     elif a.print_version:
         print(current_version())
     elif a.guard:
         guard(a.name)
     else:
-        raise SystemExit("Pass --guard, --print-version or --set-version")
+        raise SystemExit("Pass --guard, --print-version, --set-version or --bump-patch")
 
 
 if __name__ == "__main__":

@@ -59,6 +59,7 @@ $(VENV): ## create the repo-local build venv
 
 build: $(VENV)  ## build sdist + wheel
 	rm -rf $(PY_DIR)/dist $(PY_DIR)/build $(PY_DIR)/*.egg-info
+	cp $(ROOT)/LICENSE $(PY_DIR)/LICENSE
 	cd $(PY_DIR) && $(VPY) -m build
 	@ls -1 $(PY_DIR)/dist
 

@@ -1,0 +1,50 @@
+Copyright (c) 2026 Indox. All rights reserved.
+
+PROPRIETARY LICENSE
+
+This software (the "SDK") comprises the official client libraries for the Indox
+API. It is made publicly readable so that developers can inspect, evaluate and
+integrate against the Indox service. It is not open-source software.
+
+GRANT
+
+Subject to the terms below, Indox grants you a non-exclusive, non-transferable,
+revocable, royalty-free licence to:
+
+  1. use, copy and install the SDK in your own applications for the purpose of
+     accessing the Indox API;
+  2. modify the SDK as required to integrate it with your application; and
+  3. redistribute the SDK, modified or unmodified, only as an embedded component
+     of an application that calls the Indox API, provided this notice is
+     retained.
+
+RESTRICTIONS
+
+You may not:
+
+  1. redistribute the SDK as a standalone product, or publish it to a package
+     registry under any name;
+  2. use the SDK to build, operate or assist a service that competes with Indox;
+  3. remove or alter any copyright, trademark or licence notice; or
+  4. use the Indox name, logo or trademarks except to state factually that your
+     application integrates with the Indox API.
+
+Use of the Indox API itself is governed separately by the Indox Terms of Service
+and requires a valid account and API key. This licence covers the SDK source
+only and grants no right to the service.
+
+NO WARRANTY
+
+THE SDK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL INDOX BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SDK OR THE USE OR
+OTHER DEALINGS IN THE SDK.
+
+TERMINATION
+
+This licence terminates automatically if you breach it. On termination you must
+cease all use and destroy all copies of the SDK.
+
+Questions: support@indox.org

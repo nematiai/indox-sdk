@@ -1,113 +1,113 @@
 # indox-client
 
-Python SDK for Indox **API v1** (`/api/v1/…`).
+Python SDK for the Indox API v1 — document, image, video, 3D-model and font conversion.
 
-**Version:** 0.4.0  
-**Requires:** Python ≥ 3.9, `requests ≥ 2.28`
+**Requires:** Python ≥ 3.9 · `requests ≥ 2.28`
 
-## Install (macOS)
-
-From the monorepo (dev):
+## Install
 
 ```bash
-cd /path/to/indox
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .   # if package root is configured
-# or:
-pip install requests
-export PYTHONPATH="/path/to/indox:$PYTHONPATH"
+pip install indox-client
 ```
 
-## Create an API key
+## Authenticate
 
-### Option A — Dashboard
+Create an API key in your Indox dashboard under **API Keys**. The value is shown once at
+creation and starts with `ak_`.
 
-1. Open the app (local: `http://localhost:41002` or your host LAN IP).
-2. Sign in → **Dashboard → API Keys** (or `/dashboard/keys`).
-3. Create a key → copy the `ak_…` value once (shown only at creation).
-
-### Option B — Local Docker (dev)
-
-On the machine running the stack:
+Pass it directly, or set `INDOX_API_KEY` and let the client pick it up:
 
 ```bash
-docker compose --env-file .env -f docker/local/compose.yml exec -T django \
-  python manage.py shell -c "
-from django.contrib.auth import get_user_model
-from apps.user.models import UserProfile
-from apps.user.api_keys import APIKey
-u = get_user_model().objects.get(username='YOUR_USERNAME')
-APIKey.objects.filter(user=u, name='macos-sdk').update(is_active=False)
-raw, k = APIKey.create_api_key(u, 'macos-sdk', ['read','write','admin'], expires_in_days=30)
-print(raw)
-"
+export INDOX_API_KEY='ak_your_key_here'
 ```
-
-## Convert from macOS
-
-Point `INDOX_BASE_URL` at a host the Mac can reach:
-
-| Where API runs | Base URL |
-|---|---|
-| Same Mac (local docker) | `http://localhost:41000` (API) or via nginx `http://localhost:41002` if proxied |
-| Linux box on LAN | `http://<linux-lan-ip>:41000` |
-
-```bash
-export INDOX_API_KEY='ak_xxxxxxxx'
-export INDOX_BASE_URL='http://YOUR_HOST:41000'   # or https://indox.org
-
-python3 <<'PY'
-from indox_client import Indox
-
-with Indox() as client:  # reads INDOX_API_KEY / INDOX_BASE_URL
-    print(client.health.get())
-    print(client.fonts.formats.list())
-    # Font convert + download
-    out = client.fonts.convert_and_download(
-        "./MyFont.ttf",
-        target_format="woff2",
-        output_path="./MyFont.woff2",
-    )
-    print("saved", out)
-PY
-```
-
-PDF example:
 
 ```python
 from indox_client import Indox
 
-with Indox(api_key="ak_…", base_url="http://HOST:41000") as client:
-    job = client.pdf.convert("./input.pdf", target_format="docx")
-    cid = job["id"]  # or job["conversion_id"]
-    client.pdf.wait(cid)
-    client.pdf.download(cid, "./out.docx")
+with Indox() as client:                 # reads INDOX_API_KEY
+    print(client.health.get())
+
+with Indox(api_key="ak_...") as client:  # or pass it explicitly
+    ...
 ```
 
-## Resources (v1 P0–P3 + PDF ADV)
+The client defaults to `https://indox.org`. Point it elsewhere only if you run your own
+instance — `Indox(base_url="https://api.example.com")`, or set `INDOX_BASE_URL`.
 
-| Attribute | Coverage |
+## Convert a file
+
+Conversions are asynchronous: submit, poll, download.
+
+```python
+from indox_client import Indox
+
+with Indox() as client:
+    job = client.images.convert("photo.png", target_format="webp")
+    done = client.images.wait(job["id"], timeout=120)
+    client.media.download(job["id"], "photo.webp")
+```
+
+Fonts have a one-call helper that does all three steps:
+
+```python
+with Indox() as client:
+    client.fonts.convert_and_download(
+        "MyFont.ttf", target_format="woff2", output_path="MyFont.woff2"
+    )
+```
+
+Before spending credits, you can check a conversion is supported:
+
+```python
+client.fonts.validate("MyFont.ttf", "woff2")
+# {'valid': True, 'input': 'ttf', 'output': 'woff2', 'engine': 'fonttools', 'credits': 1}
+```
+
+## Discover what is supported
+
+```python
+client.images.formats()        # image formats and pairs
+client.videos.formats()
+client.models.formats()
+client.pdf.formats()
+client.fonts.formats.list()
+client.fonts.formats.get("ttf")
+```
+
+## Resources
+
+| Attribute | Covers |
 |---|---|
-| `client.health` | GET health |
-| `client.fonts` | formats, quota, health, upload/convert/validate/inspect, wait/download |
-| `client.pdf` | convert, formats, ops, history, download + pipeline/scan/signing |
-| `client.docs` | credits, conversion, batch, hide |
-| `client.media` | health, credits, conversion, download, batch |
-| `client.images` | `/api/v1/convert/image/` |
-| `client.videos` | `/api/v1/convert/video/` |
-| `client.models` | `/api/v1/convert/model/` |
-| `client.webhooks` | CRUD + deliveries + test |
-| `client.user` | me, storage, usage, shares, login/logout |
-| `client.billing` | credits, plans, purchase, tasks (no admin) |
+| `client.health` | service health |
+| `client.images` · `client.videos` · `client.models` | media conversion |
+| `client.media` | media job status, downloads, batches, credits |
+| `client.pdf` | document conversion, form fields, pipelines, phone scan, e-signing |
+| `client.docs` | document job status, batches, credits |
+| `client.fonts` | formats, quota, upload, convert, validate, inspect, download |
+| `client.webhooks` | create, list, update, delete, deliveries, test |
+| `client.user` | profile, storage, usage, share links |
+| `client.billing` | credit balance, plans, purchases |
 
-## Live allowlist smoke
+## Errors and timeouts
 
-```bash
-PYTHONPATH=. INDOX_BASE_URL=http://localhost:41000 INDOX_API_KEY=ak_… \
-  python backend/tests/test_indox_client_sdk_v1.py
+Failures raise typed exceptions from `indox_client._exceptions` — `AuthenticationError`,
+`PermissionDeniedError`, `NotFoundError`, `BadRequestError`, `ConversionError`,
+`APIConnectionError` — each carrying `status_code` and the parsed `response`.
+
+```python
+from indox_client import Indox
+from indox_client._exceptions import BadRequestError
+
+try:
+    client.images.convert("photo.png", target_format="nope")
+except BadRequestError as exc:
+    print(exc.status_code, exc.response)
 ```
 
-## Auth
+Requests use a 5 s connect / 60 s read timeout by default:
+`Indox(timeout=(5.0, 120.0))` to change it.
 
-`Authorization: Bearer <api_key>` — set via `api_key=` or `INDOX_API_KEY`.
+## Links
+
+- Documentation — <https://indox.org/docs/>
+- Source, and SDKs for 7 other languages — <https://github.com/nematiai/indox-sdk>

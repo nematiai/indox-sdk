@@ -1,5 +1,5 @@
 # indox-sdk — the 8 official API v1 clients, their codegen pipeline and gates.
-# Config comes from .env (see .env.example); nothing is hardcoded here.
+# Config comes from .env at the repo root — internal, git-ignored, not published.
 ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PY = cd $(ROOT) && PYTHONPATH=$(ROOT) python3
 

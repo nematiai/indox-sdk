@@ -106,6 +106,7 @@ def raise_for_status(status_code: int, message: str, **kwargs: Any) -> None:
         402: PaymentRequiredError,
         403: PermissionDeniedError,
         404: NotFoundError,
+        422: BadRequestError,
         429: RateLimitError,
     }
 

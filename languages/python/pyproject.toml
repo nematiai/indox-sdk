@@ -8,10 +8,29 @@ dynamic = ["version"]
 description = "Python SDK for the Indox media and document conversion services."
 readme = "indox_client/README.md"
 requires-python = ">=3.9"
-license = { text = "LicenseRef-Proprietary" }
+license = "LicenseRef-Proprietary"
+license-files = ["LICENSE"]
 authors = [{ name = "Indox", email = "support@indox.org" }]
 keywords = ["indox", "document-conversion", "media-conversion", "sdk", "api-client"]
 dependencies = ["requests>=2.28.0"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://indox.org"
+Source = "https://github.com/nematiai/indox-sdk"
+Issues = "https://github.com/nematiai/indox-sdk/issues"
 
 [project.optional-dependencies]
 dev = [

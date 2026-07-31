@@ -16,6 +16,21 @@ __all__ = ["BaseClient", "DEFAULT_TIMEOUT"]
 DEFAULT_TIMEOUT = (5.0, 60.0)  # (connect, read)
 
 
+def _error_message(payload: dict[str, Any]) -> str:
+    """The API reports failures under several keys; pick whichever is present.
+
+    Reading only `detail` left the real reason buried in `.response` while the
+    exception stringified to a bare "HTTP 404".
+    """
+    for key in ("detail", "error", "message", "non_field_errors"):
+        value = payload.get(key)
+        if isinstance(value, (list, tuple)):
+            value = "; ".join(str(v) for v in value)
+        if value:
+            return str(value)
+    return ""
+
+
 class BaseClient:
     """Low-level HTTP client used by all resources."""
 
@@ -80,7 +95,7 @@ class BaseClient:
         """Process response and raise appropriate errors."""
         if response.status_code >= 400:
             payload = self._safe_json(response)
-            message = payload.get("detail") if isinstance(payload, dict) else response.text
+            message = _error_message(payload) if isinstance(payload, dict) else response.text
             raise_for_status(
                 response.status_code,
                 message or f"HTTP {response.status_code}",

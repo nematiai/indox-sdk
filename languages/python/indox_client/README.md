@@ -59,8 +59,9 @@ with Indox() as client:
 Before spending credits, you can check a conversion is supported:
 
 ```python
-client.fonts.validate("MyFont.ttf", "woff2")
-# {'valid': True, 'input': 'ttf', 'output': 'woff2', 'engine': 'fonttools', 'credits': 1}
+client.fonts.validate("MyFont.ttf", target_format="woff2")
+# {'valid': True, 'input': 'ttf', 'output': 'woff2',
+#  'engine': 'fonttools', 'credits': 1, 'error': None}
 ```
 
 ## Discover what is supported
@@ -90,24 +91,30 @@ client.fonts.formats.get("ttf")
 
 ## Errors and timeouts
 
-Failures raise typed exceptions from `indox_client._exceptions` — `AuthenticationError`,
-`PermissionDeniedError`, `NotFoundError`, `BadRequestError`, `ConversionError`,
-`APIConnectionError` — each carrying `status_code` and the parsed `response`.
+Failures raise typed exceptions, all importable from `indox_client` and all
+subclasses of `IndoxError`.
+
+Errors carrying an HTTP response — `BadRequestError`, `AuthenticationError`,
+`PermissionDeniedError`, `NotFoundError`, `RateLimitError`, `APIStatusError` — expose
+`status_code` and the parsed `response`:
 
 ```python
-from indox_client import Indox
-from indox_client._exceptions import BadRequestError
+from indox_client import Indox, BadRequestError
 
 try:
     client.images.convert("photo.png", target_format="nope")
 except BadRequestError as exc:
     print(exc.status_code, exc.response)
+    # 400 {'non_field_errors': ['Unsupported output file format: nope']}
 ```
+
+`APIConnectionError` (the request never reached the API) and `ConversionError` (a job
+failed server-side) have no HTTP status. Catch `IndoxError` to cover everything.
 
 Requests use a 5 s connect / 60 s read timeout by default:
 `Indox(timeout=(5.0, 120.0))` to change it.
 
 ## Links
 
-- Documentation — <https://indox.org/docs/>
-- Source, and SDKs for 7 other languages — <https://github.com/nematiai/indox-sdk>
+- Source, docs, and SDKs for 7 other languages — <https://github.com/nematiai/indox-sdk>
+- Indox — <https://indox.org>

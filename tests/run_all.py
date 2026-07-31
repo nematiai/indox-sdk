@@ -17,7 +17,7 @@ _REPO = Path(__file__).resolve().parents[1]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from tests.common import LANGS, SKIPPED_NATIVE  # noqa: E402
+from tests.common import LANGS, SKIPPED_NATIVE, clean_images, teardown_image  # noqa: E402
 from tools.creds import find_api_key, key_required, missing_key_reason  # noqa: E402
 from tests.test_dotnet import test_dotnet  # noqa: E402
 from tests.test_go import test_go  # noqa: E402
@@ -55,7 +55,15 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Skip the 79-probe Python allowlist (faster CI loop).",
     )
+    parser.add_argument(
+        "--clean-images",
+        action="store_true",
+        help="Remove only the toolchain images these tests pulled, then exit.",
+    )
     args = parser.parse_args(argv)
+
+    if args.clean_images:
+        return clean_images()
 
     if args.skip_python_allowlist:
         os.environ["SDK_TEST_SKIP_PYTHON_ALLOWLIST"] = "1"
@@ -72,11 +80,14 @@ def main(argv: list[str] | None = None) -> int:
     langs = args.lang or list(LANGS)
     summary: list[tuple[str, str]] = []
     any_fail = False
+    # One language at a time: its container is already gone (--rm), so its image
+    # can be torn down before the next language pulls anything.
     for lang in langs:
         print("=" * 60)
         print(f"LANG {lang}")
         print("=" * 60)
         fails = RUNNERS[lang]()
+        teardown_image(lang)
         if fails:
             any_fail = True
             summary.append((lang, "FAIL"))

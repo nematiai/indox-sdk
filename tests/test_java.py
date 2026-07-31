@@ -2,17 +2,16 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    javac = shutil.which("javac")
-    java = shutil.which("java")
+    javac = toolchain("java", "javac")
+    java = toolchain("java", "java")
     if not javac or not java:
         return skip_native("java", "jdk not installed")
     src = REPO / "languages" / "java" / "src" / "main" / "java" / "org" / "indox" / "IndoxClient.java"
@@ -22,7 +21,7 @@ def _native() -> list[str]:
         out = Path(tmp)
         print("[java] compile IndoxClient")
         proc = subprocess.run(
-            [javac, "-d", str(out), str(src)],
+            [*javac, "-d", str(out), str(src)],
             check=False,
             capture_output=True,
             text=True,
@@ -51,14 +50,14 @@ public class Smoke {
 """.strip(),
             encoding="utf-8",
         )
-        proc = subprocess.run([javac, "-cp", str(out), str(runner)], check=False, capture_output=True, text=True)
+        proc = subprocess.run([*javac, "-cp", str(out), str(runner)], check=False, capture_output=True, text=True)
         if proc.returncode != 0:
             return [f"javac Smoke: {proc.stderr.strip() or proc.returncode}"]
         env = os.environ.copy()
         env["INDOX_API_KEY"] = key
         env["INDOX_BASE_URL"] = base
         proc = subprocess.run(
-            [java, "-cp", str(out), "Smoke"],
+            [*java, "-cp", str(out), "Smoke"],
             env=env,
             check=False,
             capture_output=True,

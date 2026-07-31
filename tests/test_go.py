@@ -2,20 +2,16 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
 from tools.sdk_targets import GO_MODULE
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    go = shutil.which("go")
-    if not go:
-        return skip_native("go", "go not installed")
     key = load_api_key()
     base = base_url()
     mod = REPO / "languages" / "go"
@@ -32,7 +28,6 @@ package main
 
 import (
   "fmt"
-  "os"
   "__GO_MODULE__/indox"
 )
 
@@ -47,16 +42,16 @@ func main() {
 """.strip().replace("__GO_MODULE__", GO_MODULE),
             encoding="utf-8",
         )
+        go = toolchain("go", "go", cwd=str(root))
+        if not go:
+            return skip_native("go", "go not installed")
         print("[go] IndoxClient health")
         env = os.environ.copy()
         env["INDOX_API_KEY"] = key
         env["INDOX_BASE_URL"] = base
-        for cmd in (
-            [go, "mod", "tidy"],
-            [go, "run", "."],
-        ):
+        for args in (["mod", "tidy"], ["run", "."]):
             proc = subprocess.run(
-                cmd,
+                [*go, *args],
                 cwd=str(root),
                 env=env,
                 check=False,
@@ -64,8 +59,8 @@ func main() {
                 text=True,
             )
             if proc.returncode != 0:
-                return [f"go {' '.join(cmd[1:])}: {proc.stderr.strip() or proc.returncode}"]
-            if proc.stdout and cmd[1] == "run":
+                return [f"go {' '.join(args)}: {proc.stderr.strip() or proc.returncode}"]
+            if proc.stdout and args[0] == "run":
                 print(proc.stdout.rstrip())
     return []
 

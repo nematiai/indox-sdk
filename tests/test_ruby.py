@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    ruby = shutil.which("ruby")
+    ruby = toolchain("ruby", "ruby")
     if not ruby:
         return skip_native("ruby", "ruby not installed")
     lib = REPO / "languages" / "ruby" / "lib" / "indox_client.rb"
@@ -26,7 +25,7 @@ puts "PASS ruby IndoxClient health HTTP #{{res.code}}"
 """
     print("[ruby] IndoxClient health")
     proc = subprocess.run(
-        [ruby, "-e", code],
+        [*ruby, "-e", code],
         env=os.environ.copy(),
         check=False,
         capture_output=True,

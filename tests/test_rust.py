@@ -2,18 +2,14 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    cargo = shutil.which("cargo")
-    if not cargo:
-        return skip_native("rust", "cargo not installed")
     key = load_api_key()
     base = base_url()
     crate = REPO / "languages" / "rust"
@@ -46,12 +42,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 """.strip(),
             encoding="utf-8",
         )
+        cargo = toolchain("rust", "cargo", cwd=str(root))
+        if not cargo:
+            return skip_native("rust", "cargo not installed")
         print("[rust] cargo run Indox::health")
         env = os.environ.copy()
         env["INDOX_API_KEY"] = key
         env["INDOX_BASE_URL"] = base
         proc = subprocess.run(
-            [cargo, "run", "-q"],
+            [*cargo, "run", "-q"],
             cwd=str(root),
             env=env,
             check=False,

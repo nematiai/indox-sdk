@@ -2,18 +2,14 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    dotnet = shutil.which("dotnet")
-    if not dotnet:
-        return skip_native("dotnet", "dotnet not installed")
     key = load_api_key()
     base = base_url()
     src = (REPO / "languages" / "dotnet" / "src" / "IndoxClient.cs").read_text(encoding="utf-8")
@@ -45,12 +41,15 @@ Console.WriteLine($"PASS csharp IndoxClient health HTTP {code}");
 """.strip(),
             encoding="utf-8",
         )
+        dotnet = toolchain("dotnet", "dotnet", cwd=str(root))
+        if not dotnet:
+            return skip_native("dotnet", "dotnet not installed")
         print("[dotnet] build+run IndoxClient")
         env = os.environ.copy()
         env["INDOX_API_KEY"] = key
         env["INDOX_BASE_URL"] = base
         proc = subprocess.run(
-            [dotnet, "run", "--nologo", "-v", "q"],
+            [*dotnet, "run", "--nologo", "-v", "q"],
             cwd=str(root),
             env=env,
             check=False,

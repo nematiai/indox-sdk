@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    node = shutil.which("node")
+    node = toolchain("typescript", "node", cwd=str(REPO))
     if not node:
         return skip_native("typescript", "node not installed")
     smoke = REPO / "languages" / "typescript" / "smoke.mjs"
@@ -19,7 +18,7 @@ def _native() -> list[str]:
     # Every sibling forwards the key; without it smoke.mjs self-skips and scores PASS.
     env["INDOX_API_KEY"] = load_api_key()
     proc = subprocess.run(
-        [node, str(smoke)],
+        [*node, str(smoke)],
         cwd=str(REPO),
         env=env,
         check=False,

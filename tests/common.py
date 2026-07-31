@@ -10,6 +10,13 @@ from tools.creds import load_api_key  # noqa: F401
 from tools.env import require_env
 from tools.packages import LANGS, REQUIRED  # noqa: F401
 
+from .toolchain import (  # noqa: F401
+    TOOLCHAIN_IMAGES,
+    clean_images,
+    teardown_image,
+    toolchain,
+)
+
 REPO = Path(__file__).resolve().parents[1]
 SDK = REPO
 SOFT = {400, 401, 403, 404, 405, 409, 415, 422, 429}

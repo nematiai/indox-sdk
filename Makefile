@@ -10,7 +10,7 @@ PY_DIR = $(ROOT)/languages/python
 VENV = $(PY_DIR)/.venv
 VPY  = $(VENV)/bin/python
 
-.PHONY: help openapi gen gen-all drift packages smoke test ci version bump build dist-check publish release
+.PHONY: help openapi gen gen-all drift packages smoke test test-all test-clean ci version bump build dist-check publish release
 .DEFAULT_GOAL := help
 
 help:          ## list targets
@@ -37,6 +37,12 @@ smoke:         ## allowlist smoke via the Python client
 
 test:          ## run the suite for all languages (SDK_LANG=… FAST=1)
 	$(PY) -m tests.run_all $(if $(SDK_LANG),--lang $(SDK_LANG),) $(if $(filter 1,$(FAST)),--skip-python-allowlist,)
+
+test-all:      ## run every language, using Docker for missing toolchains (CLEAN=1 to drop each image after use)
+	SDK_DOCKER=1 $(if $(filter 1,$(CLEAN)),SDK_DOCKER_CLEAN=1,) $(MAKE) test
+
+test-clean:    ## remove the toolchain images these tests pulled (never a pre-existing one)
+	$(PY) -m tests.run_all --clean-images
 
 ci:            ## drift + package layout + multi-language tests
 	$(PY) tools/ci_gates.py $(if $(filter 1,$(REBUILD)),--rebuild,)

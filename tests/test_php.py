@@ -2,16 +2,15 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
-from .common import REPO, base_url, load_api_key, run_lang, skip_native
+from .common import REPO, base_url, load_api_key, run_lang, skip_native, toolchain
 
 
 def _native() -> list[str]:
-    php = shutil.which("php")
+    php = toolchain("php", "php")
     if not php:
         return skip_native("php", "php not installed")
     key = load_api_key()
@@ -42,7 +41,7 @@ echo "PASS php IndoxClient health HTTP $code\\n";
         path = Path(fh.name)
     try:
         proc = subprocess.run(
-            [php, str(path)],
+            [*php, str(path)],
             env=os.environ.copy(),
             check=False,
             capture_output=True,

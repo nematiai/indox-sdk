@@ -9,25 +9,42 @@ integrate against the Indox service. It is not open-source software.
 GRANT
 
 Subject to the terms below, Indox grants you a non-exclusive, non-transferable,
-revocable, royalty-free licence to:
+non-sublicensable, revocable, royalty-free licence to:
 
-  1. use, copy and install the SDK in your own applications for the purpose of
-     accessing the Indox API;
-  2. modify the SDK as required to integrate it with your application; and
-  3. redistribute the SDK, modified or unmodified, only as an embedded component
-     of an application that calls the Indox API, provided this notice is
-     retained.
+  1. install and copy the SDK ONLY to the extent technically necessary to run it
+     within your own application, and ONLY for the purpose of calling the Indox
+     API under a valid Indox account;
+  2. modify the SDK ONLY as required to integrate it with that application; and
+  3. distribute the SDK, modified or unmodified, ONLY as a non-primary embedded
+     component of such an application, with this notice retained in full.
+
+No other right is granted. Any use not expressly permitted above is reserved.
 
 RESTRICTIONS
 
-You may not:
+You may not, in whole or in part:
 
-  1. redistribute the SDK as a standalone product, or publish it to a package
-     registry under any name;
-  2. use the SDK to build, operate or assist a service that competes with Indox;
-  3. remove or alter any copyright, trademark or licence notice; or
-  4. use the Indox name, logo or trademarks except to state factually that your
+  1. copy, publish, mirror, host or redistribute the SDK or its source as a
+     standalone work, under any name, on any package registry, repository or
+     distribution channel;
+  2. create, publish or distribute a derivative SDK, client library, wrapper,
+     port or translation of the SDK into any other language;
+  3. use the SDK, or knowledge derived from it, to build, operate, market or
+     assist any product or service that competes with Indox;
+  4. use the SDK or its source as input to train, fine-tune, evaluate or ground
+     any machine-learning model, or include it in any dataset for that purpose;
+  5. reverse engineer, decompile or study the SDK to replicate, reimplement or
+     circumvent the Indox API or any part of the Indox service;
+  6. use the SDK to access the Indox API without a valid account and API key, or
+     to exceed, evade or disguise the limits of your plan;
+  7. sell, lease, sublicense, rent or otherwise transfer the SDK or any right in
+     it to a third party;
+  8. remove, obscure or alter any copyright, trademark or licence notice; or
+  9. use the Indox name, logo or trademarks except to state factually that your
      application integrates with the Indox API.
+
+Where mandatory law grants you a right that this licence purports to restrict,
+that restriction does not apply to you to the minimum extent required by law.
 
 Use of the Indox API itself is governed separately by the Indox Terms of Service
 and requires a valid account and API key. This licence covers the SDK source

@@ -8,10 +8,9 @@ import {
   FontConversionApi,
   PDFHandlerApi,
   CoreApi,
-  MediaCoreApi,
-  ConvertImageApi,
-  ConvertVideoApi,
-  ConvertModelApi,
+  ImageConverterApi,
+  VideoConverterApi,
+  ModelConverterApi,
   WebhooksApi,
 } from "../generated/src/index.js";
 
@@ -52,10 +51,11 @@ export class Indox {
   readonly fonts: FontConversionApi;
   readonly pdf: PDFHandlerApi;
   readonly docs: CoreApi;
-  readonly media: MediaCoreApi;
-  readonly images: ConvertImageApi;
-  readonly videos: ConvertVideoApi;
-  readonly models: ConvertModelApi;
+  // docs_core and media_core share one generated tag, so both read from CoreApi.
+  readonly media: CoreApi;
+  readonly images: ImageConverterApi;
+  readonly videos: VideoConverterApi;
+  readonly models: ModelConverterApi;
   readonly webhooks: WebhooksApi;
 
   constructor(opts: IndoxOptions = {}) {
@@ -74,10 +74,10 @@ export class Indox {
     this.fonts = new FontConversionApi(this.config);
     this.pdf = new PDFHandlerApi(this.config);
     this.docs = new CoreApi(this.config);
-    this.media = new MediaCoreApi(this.config);
-    this.images = new ConvertImageApi(this.config);
-    this.videos = new ConvertVideoApi(this.config);
-    this.models = new ConvertModelApi(this.config);
+    this.media = this.docs;
+    this.images = new ImageConverterApi(this.config);
+    this.videos = new VideoConverterApi(this.config);
+    this.models = new ModelConverterApi(this.config);
     this.webhooks = new WebhooksApi(this.config);
   }
 

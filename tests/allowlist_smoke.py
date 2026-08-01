@@ -29,6 +29,11 @@ _UUID = "00000000-0000-0000-0000-000000000000"
 _DOWNLOAD_SCRATCH = Path(tempfile.gettempdir()) / "indox-sdk-dl.bin"
 OK_SOFT = {400, 401, 403, 404, 405, 409, 415, 422, 429}
 
+# 401/403 is a PASS above, so an invalid key would score a clean board. These
+# two are 2xx only for an authenticated caller and must actually succeed.
+AUTH_SENTINELS = ("webhooks.list", "billing.credits_balance")
+_OK_LABELS: set[str] = set()
+
 
 def _load_key() -> str:
     return load_api_key()
@@ -37,6 +42,7 @@ def _load_key() -> str:
 def _probe(label: str, fn: Callable[[], Any], failures: list[str]) -> None:
     try:
         fn()
+        _OK_LABELS.add(label)
         print(f"  PASS {label}")
     except APIStatusError as exc:
         if exc.status_code in OK_SOFT:
@@ -140,6 +146,13 @@ def main() -> None:
         _probe("billing.storage_initiate", lambda: c.billing.storage_initiate({}), failures)
         _probe("billing.task_completion", lambda: c.billing.task_completion({}), failures)
         _probe("billing.task_history", c.billing.task_history, failures)
+
+    for label in AUTH_SENTINELS:
+        if label not in _OK_LABELS:
+            failures.append(
+                f"auth sentinel {label} did not return 2xx"
+                " — the API key is missing, wrong, expired or revoked"
+            )
 
     if failures:
         print(f"\nFAIL {len(failures)} probe(s)")

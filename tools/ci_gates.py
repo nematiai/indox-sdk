@@ -37,7 +37,7 @@ def main() -> None:
     if not args.skip_tests:
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{REPO}{os.pathsep}{env.get('PYTHONPATH', '')}"
-        # Fast by default in CI gates — full Python allowlist via `make sdk-test`.
+        # Fast by default in CI gates — full Python allowlist via `make test`.
         _run(
             [
                 sys.executable,

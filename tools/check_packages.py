@@ -30,12 +30,12 @@ def main() -> None:
             # generated/ is git-ignored — a fresh clone has none until codegen runs.
             # The spec IS tracked, so this needs Docker + network, not a running backend.
             print(
-                f"\nRun `make sdk-gen-all` to build the generated clients first"
+                f"\nRun `make gen-all` to build the generated clients first"
                 f" (needs Docker + network; reads the tracked {PUBLIC_OUT.name},"
                 f" so the backend does not have to be up)."
             )
             if not PUBLIC_OUT.is_file():
-                print(f"Missing {PUBLIC_OUT} — run `make sdk-openapi` first (needs the stack up).")
+                print(f"Missing {PUBLIC_OUT} — run `make openapi` first (needs the stack up).")
         raise SystemExit(1)
     print(f"OK package layout for {len(REQUIRED)} languages")
 

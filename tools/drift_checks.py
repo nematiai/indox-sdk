@@ -44,8 +44,8 @@ def check_sources(base_url: str, drf_path: Path) -> tuple[list[str], int]:
     """Return (ops resolving nowhere, ops resolving ONLY in the checked-in DRF dump).
 
     The second number is the honest limit of this gate: those ops are verified
-    against a file that `sdk-ci` never refreshes, so deleting one of those routes
-    in code would not be seen until `make sdk-openapi` re-dumps.
+    against a file that `make ci` never refreshes, so deleting one of those routes
+    in code would not be seen until `make openapi` re-dumps.
     """
     live_paths = index_paths(dict(fetch_live(base_url).get("paths") or {}))
     drf_paths = index_paths(dict(load_drf(drf_path).get("paths") or {}))

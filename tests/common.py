@@ -33,7 +33,30 @@ PROBES: tuple[tuple[str, str], ...] = (
     ("billing.credits", "/api/v1/subscription/credits/balance/"),
 )
 
+# Probes that are 200 only for an authenticated caller. 401/403 is a SOFT status
+# elsewhere (some endpoints legitimately forbid this user), so without these an
+# invalid key turns the whole board green instead of red.
+AUTH_SENTINELS: tuple[str, ...] = ("webhooks.list", "billing.credits")
+
 PACKAGE_REQUIRED = REQUIRED
+
+if not set(AUTH_SENTINELS) <= {label for label, _ in PROBES}:
+    raise SystemExit("AUTH_SENTINELS must all be probes, or they never run")
+
+
+def auth_failures(seen: dict[str, int]) -> list[str]:
+    """Sentinels must be 2xx; anything else means the key, not the endpoint, is wrong."""
+    failures: list[str] = []
+    for label in AUTH_SENTINELS:
+        status = seen.get(label)
+        if status is not None and 200 <= status < 300:
+            continue
+        got = status if status is not None else "no response"
+        failures.append(
+            f"auth sentinel {label}: HTTP {got}, expected 2xx"
+            " — the API key is missing, wrong, expired or revoked"
+        )
+    return failures
 
 
 def base_url() -> str:
@@ -65,6 +88,7 @@ def run_http_probes(lang: str, *, key: str | None = None, base: str | None = Non
     key = key or load_api_key()
     base = base or base_url()
     failures: list[str] = []
+    seen: dict[str, int] = {}
     print(f"[{lang}] HTTP smoke base={base}")
     for label, path in PROBES:
         try:
@@ -74,6 +98,7 @@ def run_http_probes(lang: str, *, key: str | None = None, base: str | None = Non
             print(f"  FAIL {msg}")
             failures.append(msg)
             continue
+        seen[label] = status
         if status >= 500:
             msg = f"{label}: HTTP {status}"
             print(f"  FAIL {msg}")
@@ -83,7 +108,11 @@ def run_http_probes(lang: str, *, key: str | None = None, base: str | None = Non
             print(f"  FAIL {msg}")
             failures.append(msg)
         else:
-            print(f"  PASS {label} (HTTP {status})")
+            verdict = "FAIL" if label in AUTH_SENTINELS and status >= 300 else "PASS"
+            print(f"  {verdict} {label} (HTTP {status})")
+    for msg in auth_failures(seen):
+        print(f"  FAIL {msg}")
+        failures.append(msg)
     return failures
 
 

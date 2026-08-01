@@ -41,7 +41,7 @@ test:          ## run the suite for all languages (SDK_LANG=… FAST=1)
 test-all:      ## run every language, using Docker for missing toolchains (CLEAN=1 to drop each image after use)
 	SDK_DOCKER=1 $(if $(filter 1,$(CLEAN)),SDK_DOCKER_CLEAN=1,) $(MAKE) test
 
-test-clean:    ## remove the toolchain images these tests pulled (never a pre-existing one)
+test-clean:    ## report which toolchain images are on this host (removes nothing — see its output)
 	$(PY) -m tests.run_all --clean-images
 
 ci:            ## drift + package layout + multi-language tests

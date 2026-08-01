@@ -3,7 +3,7 @@
 Usage (repo root):
   PYTHONPATH=. python3 -m tests.run_all
   PYTHONPATH=. python3 -m tests.run_all --lang typescript
-  make sdk-test
+  make test
 """
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--clean-images",
         action="store_true",
-        help="Remove only the toolchain images these tests pulled, then exit.",
+        help="Report which toolchain images are on this host, then exit. Removes nothing.",
     )
     args = parser.parse_args(argv)
 

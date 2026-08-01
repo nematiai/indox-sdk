@@ -1,22 +1,20 @@
 """Run a language's native leg in its official container when the host lacks the tool.
 
 One image per language, one container at a time, `--rm` so nothing outlives its
-own test. Teardown only ever touches a tag THIS harness pulled.
+own test. Teardown only ever touches a tag THIS process pulled itself.
 """
 from __future__ import annotations
 
-import json
 import os
 import shutil
 import subprocess
-import tempfile
 from functools import lru_cache
-from pathlib import Path
 
 from tools.env import REPO, get_env
 
-# Official image per language, major-pinned. SDK_IMAGE_<LANG> overrides one
-# without touching code; used only when the toolchain is absent from the host.
+# Official image per language, major-pinned. SDK_IMAGE_<LANG> overrides which
+# image is RUN, never which image may be removed; used only when the toolchain
+# is absent from the host.
 TOOLCHAIN_IMAGES: dict[str, str] = {
     "php": "php:8.3-cli",
     "ruby": "ruby:3.3-slim",
@@ -27,13 +25,16 @@ TOOLCHAIN_IMAGES: dict[str, str] = {
     "typescript": "node:lts",
 }
 
-CONTAINER_ENV = ("INDOX_API_KEY", "INDOX_BASE_URL")
+CONTAINER_ENV = ("INDOX_API_KEY", "INDOX_BASE_URL", "INDOX_TS_CLIENT")
 
-# Tags this harness pulled and may therefore remove again — persisted so
-# `make test-clean` in a later process can never delete an image it did not fetch.
-PULL_MANIFEST = Path(
-    get_env("SDK_DOCKER_MANIFEST") or Path(tempfile.gettempdir()) / "indox-sdk-pulled-images.json"
-)
+# The only removable set, fixed in code: an env var can redirect which image a
+# language runs, so an env-derived table would let anything on the host qualify.
+REMOVABLE_IMAGES: frozenset[str] = frozenset(TOOLCHAIN_IMAGES.values())
+
+# Provenance is in-memory and process-local on purpose. Persisting it would let
+# any other process assert "this run pulled X" and earn a deletion.
+PULLED_HERE: set[str] = set()
+PRESENT_BEFORE: set[str] = set()
 USED_IMAGES: set[str] = set()
 
 
@@ -49,10 +50,6 @@ def image_for(lang: str) -> str:
     return get_env(f"SDK_IMAGE_{lang.upper()}", TOOLCHAIN_IMAGES.get(lang, ""))
 
 
-def configured_images() -> set[str]:
-    return {image_for(lang) for lang in TOOLCHAIN_IMAGES}
-
-
 @lru_cache(maxsize=1)
 def _docker_usable() -> bool:
     if not shutil.which("docker"):
@@ -64,27 +61,20 @@ def _docker(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(["docker", *args], capture_output=True, check=False, text=True)
 
 
-def _pulled() -> list[str]:
-    try:
-        data = json.loads(PULL_MANIFEST.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-    return [str(i) for i in data] if isinstance(data, list) else []
-
-
-def _pulled_write(images: list[str]) -> None:
-    PULL_MANIFEST.write_text(json.dumps(sorted(set(images))), encoding="utf-8")
+def _on_host(image: str) -> bool:
+    return _docker("image", "inspect", image).returncode == 0
 
 
 def _note_first_use(image: str) -> None:
     USED_IMAGES.add(image)
-    # Recorded BEFORE the run that pulls it: an image already on the host
-    # belongs to something else and must never be torn down.
-    if _docker("image", "inspect", image).returncode != 0:
-        _pulled_write([*_pulled(), image])
-        print(f"  PULL {image} (absent — fetched by this run)")
-    else:
+    # Decided BEFORE the run that pulls it, and binding for the whole process:
+    # an image already on the host belongs to something else, forever.
+    if _on_host(image):
+        PRESENT_BEFORE.add(image)
         print(f"  KEEP {image} (present before this run)")
+    else:
+        PULLED_HERE.add(image)
+        print(f"  PULL {image} (absent — fetched by this run)")
 
 
 def toolchain(lang: str, tool: str, *, cwd: str | None = None) -> list[str] | None:
@@ -114,14 +104,16 @@ def toolchain(lang: str, tool: str, *, cwd: str | None = None) -> list[str] | No
 
 def remove_image(image: str) -> str:
     """Remove one exact tag — never a wildcard, a dangling sweep, or a prune."""
-    if image not in configured_images():
-        return f"refused {image} (not a toolchain image)"
-    if image not in _pulled():
+    if image not in REMOVABLE_IMAGES:
+        return f"refused {image} (not a built-in toolchain image)"
+    if image in PRESENT_BEFORE:
         return f"kept {image} (present before this run)"
+    if image not in PULLED_HERE:
+        return f"kept {image} (this process did not pull it)"
     proc = _docker("rmi", image)
     if proc.returncode != 0:
         return f"could not remove {image}: {(proc.stderr or proc.stdout).strip().splitlines()[-1]}"
-    _pulled_write([i for i in _pulled() if i != image])
+    PULLED_HERE.discard(image)
     return f"removed {image}"
 
 
@@ -135,10 +127,19 @@ def teardown_image(lang: str) -> None:
 
 
 def clean_images() -> int:
-    targets = [i for i in _pulled() if i in configured_images()]
-    if not targets:
-        print("CLEAN nothing to remove — no toolchain image was pulled by these tests")
+    """Report which toolchain tags are on the host. Removes nothing, ever."""
+    print("CLEAN reports only — it does not remove anything.")
+    print("Whether these tests pulled an image is known only inside the process that")
+    print("pulled it; a later run cannot prove it, so it must not delete on a guess.")
+    if not _docker_usable():
+        print("  docker is not usable here — nothing to report")
         return 0
-    for image in targets:
-        print(f"CLEAN {remove_image(image)}")
+    present = [i for i in sorted(REMOVABLE_IMAGES) if _on_host(i)]
+    if not present:
+        print("  no toolchain image is on this host")
+        return 0
+    for image in present:
+        print(f"  present {image}")
+    print("\nRemove them yourself only if nothing else on this host needs them:")
+    print(f"  docker rmi {' '.join(present)}")
     return 0

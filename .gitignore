@@ -5,6 +5,15 @@
 *.key
 *_creds.json
 
+# Colab convert outputs (keep empty dirs via .keep)
+colab/**/output/**
+!colab/**/output/.keep
+colab/**/indox_*_results.json
+colab/convert_coverage_results.json
+# Local scratch notebooks under colab/
+colab/**/verify_*.ipynb
+colab/**/.ipynb_checkpoints/
+
 # Python build / cache
 __pycache__/
 *.py[cod]

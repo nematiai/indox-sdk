@@ -10,7 +10,7 @@ PY_DIR = $(ROOT)/languages/python
 VENV = $(PY_DIR)/.venv
 VPY  = $(VENV)/bin/python
 
-.PHONY: help openapi gen gen-all drift packages smoke test test-all test-clean ci version bump build dist-check publish release
+.PHONY: help openapi gen gen-all drift packages smoke convert-inventory convert-test test test-all test-clean ci version bump build dist-check publish release
 .DEFAULT_GOAL := help
 
 help:          ## list targets
@@ -34,6 +34,12 @@ packages:      ## assert every client tree is package-ready
 
 smoke:         ## allowlist smoke via the Python client
 	$(PY) tests/allowlist_smoke.py
+
+convert-inventory: ## list/assert all live convert formats + routes (fonts/pdf/image/video/model)
+	$(PY) -m tests.test_convert_inventory
+
+convert-test:  ## convert every colab/*/samples file to every valid output (CONVERT_MAX_JOBS=N to cap)
+	$(PY) -m tests.test_convert_samples
 
 test:          ## run the suite for all languages (SDK_LANG=… FAST=1)
 	$(PY) -m tests.run_all $(if $(SDK_LANG),--lang $(SDK_LANG),) $(if $(filter 1,$(FAST)),--skip-python-allowlist,)

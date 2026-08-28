@@ -9,6 +9,7 @@ PY_DIR = $(ROOT)/languages/python
 # openapi-generator is only distributed as an image.
 VENV = $(PY_DIR)/.venv
 VPY  = $(VENV)/bin/python
+STAMP = $(VENV)/.build-deps
 
 .PHONY: help openapi openapi-drf gen gen-all drift packages smoke convert-inventory convert-test test test-all test-clean ci version bump build dist-check publish release
 .DEFAULT_GOAL := help
@@ -80,17 +81,20 @@ bump:          ## set the version (SDK_VERSION=0.4.1)
 	@test -n "$(SDK_VERSION)" || { echo "Usage: make bump SDK_VERSION=0.4.1"; exit 1; }
 	@$(PY) tools/release.py --set-version $(SDK_VERSION)
 
-$(VENV): ## create the repo-local build venv
-	python3 -m venv $(VENV)
+# Stamped on the pip install, not on the directory: a venv that exists but is
+# missing build/twine must still re-provision, or `make publish` dies mid-release.
+$(STAMP): ## create the repo-local build venv
+	python3 -m venv --clear $(VENV)
 	$(VPY) -m pip install -q --upgrade pip build twine
+	touch $(STAMP)
 
-build: $(VENV)  ## build sdist + wheel
+build: $(STAMP)  ## build sdist + wheel
 	rm -rf $(PY_DIR)/dist $(PY_DIR)/build $(PY_DIR)/*.egg-info
 	cp $(ROOT)/LICENSE $(PY_DIR)/LICENSE
 	cd $(PY_DIR) && $(VPY) -m build
 	@ls -1 $(PY_DIR)/dist
 
-dist-check: $(VENV)  ## twine check + install the wheel into a throwaway venv and import it
+dist-check: $(STAMP)  ## twine check + install the wheel into a throwaway venv and import it
 	cd $(PY_DIR) && $(VPY) -m twine check dist/*
 	rm -rf $(PY_DIR)/.venv-verify && python3 -m venv $(PY_DIR)/.venv-verify
 	$(PY_DIR)/.venv-verify/bin/pip install -q $(PY_DIR)/dist/*.whl
@@ -98,7 +102,7 @@ dist-check: $(VENV)  ## twine check + install the wheel into a throwaway venv an
 	  print('import OK', __version__, Indox(api_key='x').base_url)"
 	rm -rf $(PY_DIR)/.venv-verify
 
-publish: $(VENV)  ## upload to PyPI (token from env or .env; TESTPYPI=1 to rehearse)
+publish: $(STAMP)  ## upload to PyPI (token from env or .env; TESTPYPI=1 to rehearse)
 	@tok=$${PYPI_TOKEN:-$$(sed -n 's/^PYPI_TOKEN=//p' $(ROOT)/.env 2>/dev/null | tail -1)}; \
 	 test -n "$$tok" || { echo "No PYPI_TOKEN in the environment or $(ROOT)/.env"; exit 1; }
 	@$(PY) tools/release.py --guard

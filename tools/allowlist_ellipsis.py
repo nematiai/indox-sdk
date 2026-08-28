@@ -31,6 +31,11 @@ _ELLIPSIS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {
         ("GET", "/api/v1/pdf_handler/signing/sign/{token}/"),
         ("POST", "/api/v1/pdf_handler/signing/sign/{token}/"),
         ("POST", "/api/v1/pdf_handler/signing/sign/{token}/decline/"),
+        # Added by backend a88475f (signer certs). Missing here meant the allowlist
+        # under-expanded silently — an under-populated group raises nothing, and
+        # check_presence only walks allowlist -> spec, so no gate could see it.
+        ("POST", "/api/v1/pdf_handler/signing/sign/{token}/certificate/"),
+        ("POST", "/api/v1/pdf_handler/signing/sign/{token}/wet-signature/"),
     ),
 }
 

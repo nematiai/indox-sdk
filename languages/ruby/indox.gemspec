@@ -7,6 +7,6 @@ Gem::Specification.new do |s|
   s.email       = ["support@indox.org"]
   s.files       = Dir["lib/**/*", "generated/lib/**/*", "README.md"]
   s.homepage    = "https://indox.org/docs/sdk/"
-  s.license     = "MIT"
+  s.license     = "LicenseRef-Proprietary"
   s.required_ruby_version = ">= 3.0"
 end

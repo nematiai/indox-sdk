@@ -101,6 +101,42 @@ def lookup_op(path: str, method: str, *path_maps: dict[str, Any]) -> dict[str, A
     return None
 
 
+def _mark_upload_fields_binary(schemas: dict[str, Any], names: set[str]) -> int:
+    """Give DRF upload fields the ``format: binary`` drf-spectacular does not emit.
+
+    A ``serializers.FileField`` comes out of the DRF dump as a bare ``type: string``
+    (verified: zero properties in openapi-drf.json carry ``format: binary``), so
+    openapi-generator types every upload parameter as a string and the generated
+    clients physically cannot send a file — the six convert endpoints are reachable
+    only via ``file_url``/``s3_key``. Rust is the worst of them: it sends the string
+    as a text form part, so the call looks like it succeeded.
+
+    Applied only to schemas that came from the DRF dump, so the ninja half — where a
+    property called ``file`` really is a URL string — is left alone.
+
+    ponytail: patched here rather than in the backend because the backend shares one
+    component between multipart/form-data and application/json, so it cannot carry
+    ``binary`` without splitting the serializer in two. Restoring the deleted
+    ``force_multipart_file_binary`` hook (backend 65c15fb) would fix the Scalar UI too;
+    do that as well, not instead — this patch survives any dump refresh.
+    """
+    patched = 0
+    for name in names:
+        props = (schemas.get(name) or {}).get("properties")
+        if not isinstance(props, dict):
+            continue
+        for key in ("file", "files"):
+            prop = props.get(key)
+            if not isinstance(prop, dict) or prop.get("format"):
+                continue
+            target = prop.setdefault("items", {}) if prop.get("type") == "array" else prop
+            if target.get("type") in (None, "string"):
+                target["type"] = "string"
+                target["format"] = "binary"
+                patched += 1
+    return patched
+
+
 def merge_components(live: dict[str, Any], drf: dict[str, Any]) -> dict[str, Any]:
     components = dict(live.get("components") or {})
     for section, blob in dict(drf.get("components") or {}).items():
@@ -110,6 +146,8 @@ def merge_components(live: dict[str, Any], drf: dict[str, Any]) -> dict[str, Any
         for k, v in blob.items():
             target.setdefault(k, v)
         components[section] = target
+    drf_schema_names = set((drf.get("components") or {}).get("schemas") or {})
+    _mark_upload_fields_binary(components.get("schemas") or {}, drf_schema_names)
     schemes = dict(components.get("securitySchemes") or {})
     schemes["ApiKeyBearer"] = {
         "type": "http",

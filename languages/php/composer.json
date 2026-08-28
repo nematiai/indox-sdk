@@ -2,7 +2,7 @@
   "name": "indox/indox",
   "description": "Official Indox API v1 SDK for PHP",
   "type": "library",
-  "license": "MIT",
+  "license": "proprietary",
   "require": {
     "php": ">=8.1",
     "ext-curl": "*",

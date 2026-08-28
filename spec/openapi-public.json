@@ -3,7 +3,11 @@
   "info": {
     "title": "Indox API v1 (public SDK)",
     "version": "1.0.0",
-    "description": "Filtered public allowlist for official SDKs (P0\u2013P3 + ADV). DRF converter routes merge from openapi-drf.json when available."
+    "description": "Filtered public allowlist for official SDKs (P0\u2013P3 + ADV). DRF converter routes merge from openapi-drf.json when available.",
+    "license": {
+      "name": "LicenseRef-Proprietary",
+      "url": "https://indox.org/terms"
+    }
   },
   "servers": [
     {
@@ -31,6 +35,9 @@
           "image_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -85,6 +92,9 @@
           }
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -146,6 +156,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -174,6 +187,9 @@
           "image_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           }
@@ -238,6 +254,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -278,6 +297,9 @@
           "model_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -332,6 +354,9 @@
           }
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -392,6 +417,9 @@
           "model_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -460,6 +488,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -503,6 +534,9 @@
           }
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -563,6 +597,9 @@
           "video_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -1509,6 +1546,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -1562,6 +1602,9 @@
           }
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -1623,6 +1666,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -1651,6 +1697,9 @@
           "image_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           }
@@ -1715,6 +1764,9 @@
         ],
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -1773,6 +1825,9 @@
           "required": true
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           }
@@ -2103,6 +2158,9 @@
         },
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           }
         ],
@@ -2142,6 +2200,9 @@
           "model_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -2196,6 +2257,9 @@
           }
         },
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -2256,6 +2320,9 @@
           "model_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -2323,6 +2390,9 @@
           "model_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -3277,6 +3347,54 @@
         "x-indox-schema-source": "live"
       }
     },
+    "/api/v1/pdf_handler/signing/sign/{token}/certificate/": {
+      "post": {
+        "operationId": "apps_pdf_handler_views_signing_cert_views_upload_certificate",
+        "summary": "Participant: attach a public identity certificate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "PDF Handler"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "title": "FileParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-indox-sdk-tier": "adv",
+        "x-indox-schema-source": "live"
+      }
+    },
     "/api/v1/pdf_handler/signing/sign/{token}/decline/": {
       "post": {
         "operationId": "apps_pdf_handler_views_signing_views_decline",
@@ -3300,6 +3418,54 @@
         "tags": [
           "PDF Handler"
         ],
+        "x-indox-sdk-tier": "adv",
+        "x-indox-schema-source": "live"
+      }
+    },
+    "/api/v1/pdf_handler/signing/sign/{token}/wet-signature/": {
+      "post": {
+        "operationId": "apps_pdf_handler_views_signing_cert_views_upload_wet_signature",
+        "summary": "Participant: attach a drawn signature image",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "PDF Handler"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "title": "FileParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
         "x-indox-sdk-tier": "adv",
         "x-indox-schema-source": "live"
       }
@@ -5153,6 +5319,9 @@
         },
         "security": [
           {
+            "ApiKeyBearer": []
+          },
+          {
             "cookieAuth": []
           },
           {}
@@ -5212,6 +5381,9 @@
           "video_converter"
         ],
         "security": [
+          {
+            "ApiKeyBearer": []
+          },
           {
             "cookieAuth": []
           },
@@ -9154,8 +9326,8 @@
       },
       "DocumentConversionAccepted": {
         "properties": {
-          "job_id": {
-            "title": "Job Id",
+          "id": {
+            "title": "Id",
             "type": "string"
           },
           "status": {
@@ -9179,14 +9351,19 @@
             },
             "title": "Target Formats",
             "type": "array"
+          },
+          "service": {
+            "title": "Service",
+            "type": "string"
           }
         },
         "required": [
-          "job_id",
+          "id",
           "status",
           "destination",
           "requested_formats",
-          "target_formats"
+          "target_formats",
+          "service"
         ],
         "title": "DocumentConversionAccepted",
         "type": "object"
@@ -9475,6 +9652,26 @@
             "additionalProperties": true,
             "title": "Operations",
             "type": "object"
+          },
+          "source_provider": {
+            "default": "",
+            "title": "Source Provider",
+            "type": "string"
+          },
+          "source_folder_id": {
+            "default": "",
+            "title": "Source Folder Id",
+            "type": "string"
+          },
+          "schedule_cron": {
+            "default": "",
+            "title": "Schedule Cron",
+            "type": "string"
+          },
+          "schedule_enabled": {
+            "default": false,
+            "title": "Schedule Enabled",
+            "type": "boolean"
           }
         },
         "required": [
@@ -9920,6 +10117,73 @@
           "message"
         ],
         "title": "MessageResponse",
+        "type": "object"
+      },
+      "AccountDeleteResponse": {
+        "description": "Response model for account deletion.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "deleted_at": {
+            "title": "Deleted At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "data_preserved": {
+            "default": true,
+            "title": "Data Preserved",
+            "type": "boolean"
+          },
+          "can_restore": {
+            "default": true,
+            "title": "Can Restore",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message",
+          "deleted_at",
+          "user_id",
+          "username",
+          "email"
+        ],
+        "title": "AccountDeleteResponse",
+        "type": "object"
+      },
+      "AccountDeleteRequest": {
+        "description": "Request model for soft deleting user account.\n\npassword is optional because a Google/Apple-only account has none; the view\nrequires it only when the user actually has a usable one.",
+        "properties": {
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "confirmation_text": {
+            "default": "DELETE MY ACCOUNT",
+            "title": "Confirmation Text",
+            "type": "string"
+          }
+        },
+        "title": "AccountDeleteRequest",
         "type": "object"
       },
       "UserResponse": {
@@ -12990,15 +13254,24 @@
         "properties": {
           "file": {
             "type": "string",
-            "writeOnly": true,
             "nullable": true,
-            "description": "Upload file directly via multipart/form-data."
+            "writeOnly": true,
+            "description": "Upload file directly via multipart/form-data.",
+            "format": "binary"
           },
           "file_url": {
-            "type": "string",
-            "format": "uri",
             "nullable": true,
-            "description": "Remote URL to fetch the source file when not uploading directly."
+            "description": "Remote URL to fetch the source file when not uploading directly.",
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "s3_key": {
             "type": "string",
@@ -13028,8 +13301,16 @@
             "nullable": true
           },
           "redirect_url": {
-            "type": "string",
-            "format": "uri"
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "engine": {
             "type": "string"
@@ -13169,14 +13450,23 @@
           },
           "file": {
             "type": "string",
-            "writeOnly": true,
             "nullable": true,
-            "description": "3D model file uploaded via multipart/form-data."
+            "writeOnly": true,
+            "description": "3D model file uploaded via multipart/form-data.",
+            "format": "binary"
           },
           "file_url": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "s3_key": {
             "type": "string",
@@ -13184,8 +13474,16 @@
             "description": "Optional S3 object key if FE uploaded directly"
           },
           "redirect_url": {
-            "type": "string",
-            "format": "uri"
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "engine": {
             "type": "string"
@@ -13339,14 +13637,23 @@
           },
           "file": {
             "type": "string",
-            "writeOnly": true,
             "nullable": true,
-            "description": "Video file uploaded via multipart/form-data."
+            "writeOnly": true,
+            "description": "Video file uploaded via multipart/form-data.",
+            "format": "binary"
           },
           "file_url": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "s3_key": {
             "type": "string",
@@ -13354,8 +13661,16 @@
             "description": "Optional S3 object key if FE uploaded directly"
           },
           "redirect_url": {
-            "type": "string",
-            "format": "uri"
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
           },
           "engine": {
             "type": "string"
@@ -13385,16 +13700,20 @@
         "type": "http",
         "scheme": "bearer"
       },
-      "cookieAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "sessionid"
+      "ServiceKeyAuth": {
+        "type": "http",
+        "scheme": "bearer"
       },
       "ApiKeyBearer": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "API key",
         "description": "Authorization: Bearer ak_\u2026"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
       }
     }
   },
@@ -13403,7 +13722,7 @@
       "ApiKeyBearer": []
     }
   ],
-  "x-indox-allowlist-ops": 112,
+  "x-indox-allowlist-ops": 114,
   "x-indox-drf-ops": 30,
   "x-indox-synthesized-ops": 0
 }

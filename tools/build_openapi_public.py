@@ -84,6 +84,11 @@ def build(
                 "Filtered public allowlist for official SDKs (P0–P3 + ADV). "
                 "DRF converter routes merge from openapi-drf.json when available."
             ),
+            # Drives the license field of every generated manifest. Without it
+            # openapi-generator stamps "Unlicense" (a public-domain dedication) into
+            # composer.json, the gemspec and Cargo.toml, while LICENSE reserves every
+            # right — and a registry publish makes that grant irrevocable.
+            "license": {"name": "LicenseRef-Proprietary", "url": "https://indox.org/terms"},
         },
         "servers": [{"url": (public_url or public_api_url()).rstrip("/")}],
         "paths": dict(sorted(public_paths.items())),

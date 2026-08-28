@@ -27,6 +27,10 @@ from indox_client._exceptions import APIStatusError  # noqa: E402
 
 _UUID = "00000000-0000-0000-0000-000000000000"
 _DOWNLOAD_SCRATCH = Path(tempfile.gettempdir()) / "indox-sdk-dl.bin"
+# form-fields is multipart with a required file. Probed with an empty body it 422'd
+# every run and still reported PASS, because 422 is in OK_SOFT — so the board called
+# a permanently broken op green. Give it a real PDF and it exercises the 200 path.
+_SAMPLE_PDF = REPO / "colab" / "pdf" / "samples" / "bitcoin.pdf"
 OK_SOFT = {400, 401, 403, 404, 405, 409, 415, 422, 429}
 
 # 401/403 is a PASS above, so an invalid key would score a clean board. These
@@ -74,7 +78,7 @@ def main() -> None:
         _probe("pdf.operations", c.pdf.operations, failures)
         _probe("pdf.history", c.pdf.history, failures)
         _probe("pdf.convert_json", lambda: c.pdf.convert_json({}), failures)
-        _probe("pdf.form_fields", lambda: c.pdf.form_fields({}), failures)
+        _probe("pdf.form_fields", lambda: c.pdf.form_fields(_SAMPLE_PDF), failures)
         _probe("pdf.get", lambda: c.pdf.get(_UUID), failures)
         _probe("pdf.download", lambda: c.pdf.download(_UUID, str(_DOWNLOAD_SCRATCH)), failures)
         _probe("pdf.list_pipelines", c.pdf.list_pipelines, failures)

@@ -58,10 +58,22 @@ class PDF(PDFAdvancedMixin):
             self._client._http.post(f"{PDF_PREFIX}/convert/json/", json_body=payload)
         )
 
-    def form_fields(self, payload: dict[str, Any]) -> dict[str, Any]:
-        return as_dict(
-            self._client._http.post(f"{PDF_PREFIX}/form-fields/", json_body=payload)
-        )
+    def form_fields(self, file_path: str | os.PathLike[str]) -> dict[str, Any]:
+        """Read a PDF's AcroForm fields.
+
+        The route is multipart-only with a required ``file`` (FileParams in the
+        spec); this used to post a JSON body, so it returned 422 every time and no
+        caller could discover a form's fields before submitting them back through
+        ``convert(..., data={"form_fields": …})``.
+        """
+        path = require_path(file_path)
+        with path.open("rb") as fh:
+            return as_dict(
+                self._client._http.post(
+                    f"{PDF_PREFIX}/form-fields/",
+                    files={"file": (path.name, fh)},
+                )
+            )
 
     def save(self, file_path: str | os.PathLike[str], **data: Any) -> dict[str, Any]:
         path = require_path(file_path)

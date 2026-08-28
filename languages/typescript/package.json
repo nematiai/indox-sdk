@@ -2,7 +2,7 @@
   "name": "@indox/sdk",
   "version": "0.1.0",
   "description": "Official Indox API v1 SDK for TypeScript / JavaScript",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "main": "./src/client.ts",
   "types": "./src/client.ts",

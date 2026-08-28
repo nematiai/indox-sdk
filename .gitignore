@@ -61,3 +61,9 @@ languages/*/generated/
 
 # copied from the canonical root LICENSE at build time
 languages/python/LICENSE
+
+# Internal spec — stays on disk for the build, never published
+spec/openapi-drf.json
+spec/ALLOWLIST.md
+spec/PLAN.md
+spec/README.md

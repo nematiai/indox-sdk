@@ -10,13 +10,28 @@ PY_DIR = $(ROOT)/languages/python
 VENV = $(PY_DIR)/.venv
 VPY  = $(VENV)/bin/python
 
-.PHONY: help openapi gen gen-all drift packages smoke convert-inventory convert-test test test-all test-clean ci version bump build dist-check publish release
+.PHONY: help openapi openapi-drf gen gen-all drift packages smoke convert-inventory convert-test test test-all test-clean ci version bump build dist-check publish release
 .DEFAULT_GOAL := help
 
-help:          ## list targets
-	@grep -hE '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | sort | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
+# The convert/media routes are DRF, not ninja, so they are absent from
+# /api/v1/openapi.json and reach the spec only through this dump. It is a
+# git-ignored local file — it exposes internal routes, so it is never published;
+# this target is the only way to refresh it, and 30 of the 114 allowlist ops are
+# gated against it.
+INDOX_CONTAINER ?= indox-django
 
-openapi:       ## rebuild spec/openapi-public.json from the live API
+help:          ## list targets
+	@grep -hE '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | sort | awk -F':.*## ' '{printf "  %-12s %s\n", $$1, $$2}'
+
+openapi-drf:   ## re-dump spec/openapi-drf.json from the running backend container
+	@docker exec -w /app/indox $(INDOX_CONTAINER) python manage.py spectacular \
+	   --format openapi-json > $(ROOT)/spec/openapi-drf.json.tmp
+	@python3 -c "import json,sys; json.load(open('$(ROOT)/spec/openapi-drf.json.tmp'))" \
+	   || { rm -f $(ROOT)/spec/openapi-drf.json.tmp; echo "spectacular produced invalid JSON"; exit 1; }
+	@mv $(ROOT)/spec/openapi-drf.json.tmp $(ROOT)/spec/openapi-drf.json
+	@echo "refreshed spec/openapi-drf.json from $(INDOX_CONTAINER)"
+
+openapi: openapi-drf  ## rebuild spec/openapi-public.json from the live API + a fresh DRF dump
 	$(PY) tools/build_openapi_public.py
 
 gen:           ## codegen one client (SDK_LANG=typescript)
